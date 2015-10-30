@@ -25,6 +25,7 @@ import com.testerhome.nativeandroid.fragments.HomeFragment;
 import com.testerhome.nativeandroid.fragments.TopicsListFragment;
 import com.testerhome.nativeandroid.models.TesterUser;
 import com.testerhome.nativeandroid.views.base.BaseActivity;
+import com.umeng.update.UmengUpdateAgent;
 
 import butterknife.Bind;
 
@@ -43,6 +44,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         setContentView(R.layout.activity_main);
 
         setupView();
+
+        UmengUpdateAgent.update(this);
     }
 
     @Override

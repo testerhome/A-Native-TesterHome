@@ -6,9 +6,9 @@ package com.testerhome.nativeandroid.models;
 public class OAuth {
     private String access_token;
     private String token_type;
-    private String expires_in;
+    private long expires_in;
     private String refresh_token;
-    private String craete_at;
+    private long craete_at;
 
     public String getAccess_token() {
         return access_token;
@@ -26,11 +26,11 @@ public class OAuth {
         this.token_type = token_type;
     }
 
-    public String getExpires_in() {
+    public long getExpires_in() {
         return expires_in;
     }
 
-    public void setExpires_in(String expires_in) {
+    public void setExpires_in(long expires_in) {
         this.expires_in = expires_in;
     }
 
@@ -42,11 +42,11 @@ public class OAuth {
         this.refresh_token = refresh_token;
     }
 
-    public String getCraete_at() {
+    public long getCraete_at() {
         return craete_at;
     }
 
-    public void setCraete_at(String craete_at) {
+    public void setCraete_at(long craete_at) {
         this.craete_at = craete_at;
     }
 

@@ -16,8 +16,7 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_marginRight="16dp"
-        fresco:roundAsCircle="true"
-        fresco:placeholderImage="@mipmap/ic_launcher"/>
+        fresco:roundAsCircle="true" />
 
     <TextView
         android:id="@+id/tv_topic_title"

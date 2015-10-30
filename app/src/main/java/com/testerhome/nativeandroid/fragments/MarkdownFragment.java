@@ -1,6 +1,7 @@
 package com.testerhome.nativeandroid.fragments;
 
 import android.content.res.AssetManager;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.testerhome.nativeandroid.R;
@@ -30,7 +31,16 @@ public class MarkdownFragment extends BaseFragment {
         AssetManager assetManager = getActivity().getResources().getAssets();
 
         try {
-            InputStream inputStream = assetManager.open("h5_template.html");
+            InputStream inputStream;
+
+            if (PreferenceManager.getDefaultSharedPreferences(getContext()).getString(SettingsFragment.KEY_PREF_THEME, "0").equals("1")) {
+                Log.e("theme", "is dark theme");
+                inputStream = assetManager.open("dark_template.html");
+            } else {
+                Log.e("theme", "is light theme");
+                inputStream = assetManager.open("h5_template.html");
+            }
+
             byte[] b = new byte[inputStream.available()];
             inputStream.read(b);
             prompt = new String(b);

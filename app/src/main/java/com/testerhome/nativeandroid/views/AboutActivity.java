@@ -7,8 +7,10 @@ import android.widget.TextView;
 
 import com.testerhome.nativeandroid.R;
 import com.testerhome.nativeandroid.views.base.BackBaseActivity;
+import com.umeng.update.UmengUpdateAgent;
 
 import butterknife.Bind;
+import butterknife.OnClick;
 
 /**
  * Created by vclub on 15/10/22.
@@ -43,4 +45,9 @@ public class AboutActivity extends BackBaseActivity {
         return "";
     }
 
+
+    @OnClick(R.id.btn_check_update)
+    void onUpdateClick(){
+        UmengUpdateAgent.forceUpdate(this);
+    }
 }

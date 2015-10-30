@@ -15,7 +15,9 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 import com.testerhome.nativeandroid.R;
+import com.testerhome.nativeandroid.application.NativeApp;
 import com.testerhome.nativeandroid.auth.TesterHomeAccountService;
+import com.testerhome.nativeandroid.models.OAuth;
 import com.testerhome.nativeandroid.models.UserDetailResponse;
 import com.testerhome.nativeandroid.networks.TesterHomeApi;
 import com.testerhome.nativeandroid.oauth2.AuthenticationService;
@@ -118,16 +120,22 @@ public class WebViewActivity extends BackBaseActivity {
                         int expiresIn = resultJson.has("expires_in") ? resultJson.getInt("expires_in") : 0;
 
                         String accessToken = resultJson.has("access_token") ? resultJson.getString("access_token") : null;
+                        String refreshToken = resultJson.has("refresh_token") ? resultJson.getString("refresh_token") : null;
+                        long createdAt = resultJson.has("created_at") ? resultJson.getLong("created_at") : 0;
+                        Log.d("refreshToken",refreshToken);
                         Log.e("Tokenm", "access token:" + accessToken);
                         if (expiresIn > 0 && accessToken != null) {
                             Log.e("Authorize", "This is the access Token: " + accessToken + ". It will expires in " + expiresIn + " secs");
 
-                            //Calculate date of expiration
                             Calendar calendar = Calendar.getInstance();
                             calendar.add(Calendar.SECOND, expiresIn);
                             long expireDate = calendar.getTimeInMillis();
-
-                            getUserInfo(accessToken, expireDate);
+                            OAuth oAuth = new OAuth();
+                            oAuth.setRefresh_token(refreshToken);
+                            oAuth.setAccess_token(accessToken);
+                            oAuth.setExpires_in(expiresIn);
+                            oAuth.setCraete_at(createdAt);
+                            getUserInfo(accessToken, oAuth);
 
                             return true;
                         }
@@ -153,14 +161,16 @@ public class WebViewActivity extends BackBaseActivity {
     }
 
 
-    private void getUserInfo(final String token, long expireDate) {
+    private void getUserInfo(final String token, final OAuth oAuth) {
         TesterHomeApi.getInstance().getTopicsService().getCurrentUserInfo(token, new retrofit.Callback<UserDetailResponse>() {
             @Override
             public void success(UserDetailResponse userDetailResponse, retrofit.client.Response response) {
                 if (userDetailResponse.getUser() != null) {
                     TesterHomeAccountService.getInstance(WebViewActivity.this)
-                            .signIn(userDetailResponse.getUser().getLogin(), token, userDetailResponse.getUser());
+                            .signIn(userDetailResponse.getUser().getLogin(), token, userDetailResponse.getUser(),oAuth);
                     WebViewActivity.this.finish();
+
+                    NativeApp.getInstance().startTimer();
                 }
             }
 

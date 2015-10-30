@@ -6,6 +6,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.testerhome.nativeandroid.R;
+import com.testerhome.nativeandroid.models.OAuth;
 import com.testerhome.nativeandroid.models.TesterUser;
 import com.testerhome.nativeandroid.utils.SharedPreferencesHelper;
 
@@ -26,8 +27,9 @@ public class TesterHomeAccountService {
     private final String KEY_USER_DATA_TOKEN = "access_token";
     private final String KEY_USER_DATA_COMPANY = "company";
     private final String KEY_USER_DATA_TAGLINE = "tagline";
-
-
+    private final String KEY_USER_DATA_REFRESH_TOKEN = "refresh_token";
+    private final String KEY_USER_DATA_EXPIRE_DATE = "expireDate";
+    private final String KEY_USER_DATA_CREATE_AT = "create_at";
     private Account activeAccount;
     private SharedPreferencesHelper spfHelper;
     private AccountManager mAccountManager;
@@ -109,7 +111,7 @@ public class TesterHomeAccountService {
         return mAccountManager.getPassword(account);
     }
 
-    public boolean signIn(String username, String password, TesterUser user) {
+    public boolean signIn(String username, String password, TesterUser user, OAuth oAuth) {
 
         if (user == null) {
             return false;
@@ -118,6 +120,9 @@ public class TesterHomeAccountService {
         setDefaultAccount(account);
 
         user.setAccess_token(password);
+        user.setRefresh_token(oAuth.getRefresh_token());
+        user.setExpireDate(oAuth.getExpires_in());
+        user.setCreate_at(oAuth.getCraete_at());
         updateAccountInfo(account, user);
 
         return true;
@@ -136,6 +141,13 @@ public class TesterHomeAccountService {
         user.setAccess_token(mAccountManager.getUserData(account, KEY_USER_DATA_TOKEN));
         user.setCompany(mAccountManager.getUserData(account, KEY_USER_DATA_COMPANY));
         user.setTagline(mAccountManager.getUserData(account, KEY_USER_DATA_TAGLINE));
+
+        if (mAccountManager.getUserData(account,KEY_USER_DATA_REFRESH_TOKEN) != null){
+            user.setExpireDate(Long.valueOf(mAccountManager.getUserData(account, KEY_USER_DATA_EXPIRE_DATE)));
+            user.setRefresh_token(mAccountManager.getUserData(account, KEY_USER_DATA_REFRESH_TOKEN));
+            user.setCreate_at(Long.valueOf(mAccountManager.getUserData(account, KEY_USER_DATA_CREATE_AT)));
+        }
+
         return user;
     }
 
@@ -155,6 +167,12 @@ public class TesterHomeAccountService {
         mAccountManager.setUserData(account, KEY_USER_DATA_TOKEN, userProfile.getAccess_token());
         mAccountManager.setUserData(account,KEY_USER_DATA_COMPANY,userProfile.getCompany());
         mAccountManager.setUserData(account,KEY_USER_DATA_TAGLINE,userProfile.getTagline());
+        if (userProfile.getRefresh_token() != null) {
+            mAccountManager.setUserData(account, KEY_USER_DATA_EXPIRE_DATE, String.valueOf(userProfile.getExpireDate()));
+            mAccountManager.setUserData(account,KEY_USER_DATA_REFRESH_TOKEN,userProfile.getRefresh_token());
+            mAccountManager.setUserData(account,KEY_USER_DATA_CREATE_AT,String.valueOf(userProfile.getCreate_at()));
+        }
+
     }
 
     private Account findAccountByUsername(String username) {
@@ -168,6 +186,14 @@ public class TesterHomeAccountService {
             }
         }
         return null;
+    }
+
+
+    public void updateAccountToken(OAuth oAuth){
+        mAccountManager.setUserData(activeAccount, KEY_USER_DATA_TOKEN, oAuth.getAccess_token());
+        mAccountManager.setUserData(activeAccount, KEY_USER_DATA_EXPIRE_DATE, String.valueOf(oAuth.getExpires_in()));
+        mAccountManager.setUserData(activeAccount,KEY_USER_DATA_REFRESH_TOKEN,oAuth.getRefresh_token());
+        mAccountManager.setUserData(activeAccount,KEY_USER_DATA_CREATE_AT,String.valueOf(oAuth.getCraete_at()));
     }
 
     public void logout() {

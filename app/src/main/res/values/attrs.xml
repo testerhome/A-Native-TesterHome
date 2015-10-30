@@ -3,4 +3,9 @@
     <declare-styleable name="TintableImageView">
         <attr name="tint" format="reference|color" />
     </declare-styleable>
+
+    <attr name="main_bg" format="reference|color"/>
+    <attr name="main_text_color" format="reference|color"/>
+    <attr name="second_bg" format="reference|color"/>
+    <attr name="second_text_color" format="reference|color"/>
 </resources>

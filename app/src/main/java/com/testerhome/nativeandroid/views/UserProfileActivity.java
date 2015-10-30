@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.testerhome.nativeandroid.Config;
 import com.testerhome.nativeandroid.R;
+import com.testerhome.nativeandroid.application.NativeApp;
 import com.testerhome.nativeandroid.auth.TesterHomeAccountService;
 import com.testerhome.nativeandroid.models.TesterUser;
 import com.testerhome.nativeandroid.views.base.BackBaseActivity;
@@ -73,6 +74,7 @@ public class UserProfileActivity extends BackBaseActivity {
         CookieSyncManager.getInstance().startSync();
         CookieManager.getInstance().removeSessionCookie();
         TesterHomeAccountService.getInstance(this).logout();
+        NativeApp.getInstance().cancelTimerTask();
         this.finish();
     }
 }

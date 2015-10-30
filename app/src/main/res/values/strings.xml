@@ -25,6 +25,8 @@
     <string name="logout">退出登录</string>
     <string name="string_loading">Loading&#8230;</string>
 
+    <string name="reply_count_info">%s条回复</string>
+
     <string name="main_drawer_settings">设置</string>
     <string name="main_drawer_about">关于</string>
     <string name="title_activity_settings">Settings</string>

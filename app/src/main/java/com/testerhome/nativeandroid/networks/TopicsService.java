@@ -7,6 +7,7 @@ import com.testerhome.nativeandroid.models.PraiseEntity;
 import com.testerhome.nativeandroid.models.TopicDetailResponse;
 import com.testerhome.nativeandroid.models.TopicReplyResponse;
 import com.testerhome.nativeandroid.models.TopicsResponse;
+import com.testerhome.nativeandroid.models.ToutiaoResponse;
 import com.testerhome.nativeandroid.models.UserDetailResponse;
 import com.testerhome.nativeandroid.models.UserResponse;
 
@@ -20,6 +21,10 @@ import retrofit.http.Query;
  * Created by Bin Li on 2015/9/15.
  */
 public interface TopicsService {
+
+    @GET("/ads/toutiao.json")
+    void getToutiao(Callback<ToutiaoResponse> callback);
+
 
     @GET("/topics.json")
     void getTopicsByType(@Query("type") String type,

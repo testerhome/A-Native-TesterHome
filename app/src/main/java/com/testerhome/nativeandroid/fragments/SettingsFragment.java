@@ -46,12 +46,17 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             // Set summary to be the user-description for the selected value
 
             themePref.setSummary(getKeyPrefThemeString(key));
+            if (getKeyPrefThemeString(key).equals("Light")){
+                getActivity().setTheme(R.style.theme_light);
+            } else {
+                getActivity().setTheme(R.style.theme_dark);
+            }
         }
     }
 
     private String getKeyPrefThemeString(String key) {
         try {
-            Integer index = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(key, ""));
+            Integer index = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(key, "0"));
             return getResources().getStringArray(R.array.pref_theme_list_titles)[index];
         } catch (Exception ex) {
             return "Light";

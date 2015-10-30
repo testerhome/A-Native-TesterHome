@@ -1,5 +1,9 @@
 package com.testerhome.nativeandroid.models;
 
+import com.testerhome.nativeandroid.views.adapters.TopicsListAdapter;
+
+import java.util.List;
+
 /**
  * Created by Bin Li on 2015/9/15.
  */
@@ -34,6 +38,21 @@ public class TopicEntity {
     private UserEntity user;
     private boolean deleted;
     private AbilitiesEntity abilities;
+
+    private int type = TopicsListAdapter.TOPIC_LIST_TYPE_TOPIC;
+    private List<BannerEntity> banners;
+
+    public TopicEntity() {
+    }
+
+    public TopicEntity(int type, List<BannerEntity> banners) {
+        this.type = type;
+        this.banners = banners;
+    }
+
+    public int getType() {
+        return type;
+    }
 
     public void setId(String id) {
         this.id = id;
@@ -138,8 +157,6 @@ public class TopicEntity {
     public AbilitiesEntity getAbilities() {
         return abilities;
     }
-
-
 
 
 }

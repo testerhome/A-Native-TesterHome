@@ -23,7 +23,9 @@ public class Config {
     public static final String PRAISE_REPLY = "reply";
 
     public static String getImageUrl(String imagePath){
-        if(!imagePath.contains("https://testerhome.com")){
+        if (imagePath.startsWith("//testerhome.com")){
+            return "https:".concat(imagePath);
+        } else if (!imagePath.contains("https://testerhome.com")) {
             return "https://testerhome.com".concat(imagePath);
         }else{
             return imagePath;

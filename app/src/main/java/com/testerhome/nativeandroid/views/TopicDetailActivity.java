@@ -10,16 +10,13 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.ShareActionProvider;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.testerhome.nativeandroid.Config;
@@ -48,10 +45,9 @@ import retrofit.client.Response;
 /**
  * Created by vclub on 15/9/17.
  */
-public class TopicDetailActivity extends BackBaseActivity implements TopicReplyFragment.ReplyUpdateListener {
+public class TopicDetailActivity extends BackBaseActivity {
 
     private String mTopicId;
-    private ShareActionProvider mShareActionProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,30 +66,27 @@ public class TopicDetailActivity extends BackBaseActivity implements TopicReplyF
         }
     }
 
+
+    @Override
+    public boolean enableTheme() {
+        return true;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_topic_detail, menu);
-
-        MenuItem item = menu.findItem(R.id.action_share);
-
-        mShareActionProvider = new ShareActionProvider(this);
-        MenuItemCompat.setActionProvider(item, mShareActionProvider);
-
-        if (!TextUtils.isEmpty(mTopicId)) {
-            updateTopicShareUrl(String.format("https://testerhome.com/topics/%s", mTopicId));
-        }
-
         return super.onCreateOptionsMenu(menu);
     }
 
-    public void updateTopicShareUrl(String topicUrl) {
-        if (mShareActionProvider != null) {
-            Intent intent = new Intent();
-            intent.setAction(Intent.ACTION_SEND);
-            intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_TEXT, topicUrl);
-            mShareActionProvider.setShareIntent(intent);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_share) {
+            final Intent target = new Intent(Intent.ACTION_SEND);
+            target.setType("text/plain");
+            target.putExtra(Intent.EXTRA_TEXT, String.format("https://testerhome.com/topics/%s", mTopicId));
+            startActivity(Intent.createChooser(target, "分享到"));
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Bind(R.id.tab_layout)
@@ -115,18 +108,16 @@ public class TopicDetailActivity extends BackBaseActivity implements TopicReplyF
     private MarkdownFragment mMarkdownFragment;
     private TopicReplyFragment mTopicReplyFragment;
 
-    @Override
     public void updateReplyCount(int count) {
-        if (tvDetailRepliesCount != null){
-            tvDetailRepliesCount.setText(String.valueOf(count));
+        if (tvDetailRepliesCount != null) {
+            if (count > mTopicEntity.getReplies_count())
+                tvDetailRepliesCount.setText(getString(R.string.reply_count_info, count));
         }
     }
 
     public class TopicDetailPagerAdapter extends FragmentPagerAdapter {
 
         private String[] typeName = {"帖子", "评论"};
-        private String[] typeValue = {Config.TOPICS_TYPE_RECENT,
-                Config.TOPICS_TYPE_POPULAR};
 
         public TopicDetailPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -141,7 +132,7 @@ public class TopicDetailActivity extends BackBaseActivity implements TopicReplyF
                 return mMarkdownFragment;
             } else {
                 if (mTopicReplyFragment == null)
-                    mTopicReplyFragment = TopicReplyFragment.newInstance(mTopicId, TopicDetailActivity.this);
+                    mTopicReplyFragment = TopicReplyFragment.newInstance(mTopicId);
                 return mTopicReplyFragment;
             }
         }
@@ -170,24 +161,25 @@ public class TopicDetailActivity extends BackBaseActivity implements TopicReplyF
     @Bind(R.id.tv_detail_replies_count)
     TextView tvDetailRepliesCount;
 
+    TopicDetailEntity mTopicEntity;
 
     private void loadInfo() {
         TesterHomeApi.getInstance().getTopicsService().getTopicById(mTopicId,
                 new Callback<TopicDetailResponse>() {
                     @Override
                     public void success(TopicDetailResponse topicDetailResponse, Response response) {
-                        TopicDetailEntity topicEntity = topicDetailResponse.getTopic();
-                        tvDetailTitle.setText(topicEntity.getTitle());
-                        tvDetailName.setText(topicEntity.getNode_name().concat("."));
-                        tvDetailUsername.setText(TextUtils.isEmpty(topicEntity.getUser().getLogin()) ?
-                                "匿名用户" : topicEntity.getUser().getName());
+                        mTopicEntity = topicDetailResponse.getTopic();
+                        tvDetailTitle.setText(mTopicEntity.getTitle());
+                        tvDetailName.setText(mTopicEntity.getNode_name().concat("."));
+                        tvDetailUsername.setText(TextUtils.isEmpty(mTopicEntity.getUser().getLogin()) ?
+                                "匿名用户" : mTopicEntity.getUser().getName());
                         tvDetailPublishDate.setText(StringUtils.formatPublishDateTime(
-                                topicEntity.getCreated_at()).concat(".")
-                                .concat(topicEntity.getHits()).concat("次阅读"));
-                        sdvDetailUserAvatar.setImageURI(Uri.parse(Config.getImageUrl(topicEntity.getUser().getAvatar_url())));
+                                mTopicEntity.getCreated_at()).concat(".")
+                                .concat(mTopicEntity.getHits()).concat("次阅读"));
+                        sdvDetailUserAvatar.setImageURI(Uri.parse(Config.getImageUrl(mTopicEntity.getUser().getAvatar_url())));
 
                         // 用户回复数
-                        tvDetailRepliesCount.setText(String.format("%s条回复", topicEntity.getReplies_count()));
+                        tvDetailRepliesCount.setText(getString(R.string.reply_count_info, mTopicEntity.getReplies_count()));
 
                         if (mMarkdownFragment != null) {
                             mMarkdownFragment.showWebContent(topicDetailResponse.getTopic().getBody_html());
@@ -196,7 +188,7 @@ public class TopicDetailActivity extends BackBaseActivity implements TopicReplyF
 
                     @Override
                     public void failure(RetrofitError error) {
-
+                        Snackbar.make(mFabAddComment, "Error:" + error.getMessage(), Snackbar.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -216,14 +208,14 @@ public class TopicDetailActivity extends BackBaseActivity implements TopicReplyF
             @Override
             public void success(CollectTopicResonse collectTopicResonse, Response response) {
                 if (collectTopicResonse.getOk() == 1) {
-                    Toast.makeText(TopicDetailActivity.this, "收藏成功", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(mFabAddComment, "收藏成功", Snackbar.LENGTH_SHORT).show();
                     tvDetailCollect.setCompoundDrawablesWithIntrinsicBounds(R.drawable.btn_bookmark_off, 0, 0, 0);
                 }
             }
 
             @Override
             public void failure(RetrofitError error) {
-                Toast.makeText(TopicDetailActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                Snackbar.make(mFabAddComment, "Error:" + error.getMessage(), Snackbar.LENGTH_SHORT).show();
             }
         });
 
@@ -238,13 +230,13 @@ public class TopicDetailActivity extends BackBaseActivity implements TopicReplyF
         TesterHomeApi.getInstance().getTopicsService().praiseTopic(Config.PRAISE_TOPIC, mTopicId, mCurrentUser.getAccess_token(), new Callback<PraiseEntity>() {
             @Override
             public void success(PraiseEntity praiseEntity, Response response) {
-                Toast.makeText(TopicDetailActivity.this, "点赞成功", Toast.LENGTH_SHORT).show();
+                Snackbar.make(mFabAddComment, "点赞成功", Snackbar.LENGTH_SHORT).show();
                 tvDetailPraise.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_heart_red, 0, 0, 0);
             }
 
             @Override
             public void failure(RetrofitError error) {
-                Toast.makeText(TopicDetailActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                Snackbar.make(mFabAddComment, "Error:" + error.getMessage(), Snackbar.LENGTH_SHORT).show();
             }
         });
 
@@ -296,8 +288,9 @@ public class TopicDetailActivity extends BackBaseActivity implements TopicReplyF
                                         mEtComment.setText("");
                                         DeviceUtil.hideSoftInput(TopicDetailActivity.this);
                                         mAddCommentPanel.setVisibility(View.GONE);
-                                        // TODO: refresh list and move to end
                                         mTopicReplyFragment.refreshReply();
+                                        // TODO: refresh reply count
+                                        // updateReplyCount();
                                     } else {
                                         Snackbar.make(mFabAddComment,
                                                 createReplyResponse.getError().toString(),

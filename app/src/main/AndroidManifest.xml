@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.GET_TASKS" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- account manager -->
@@ -37,7 +38,14 @@
         <activity
             android:name=".views.TopicDetailActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustPan">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.chooser.chooser_target_service"
+                android:value=".TesterChooserTargetService" />
+        </activity>
         <activity
             android:name=".views.WebViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize" />
@@ -75,9 +83,32 @@
 
         <activity
             android:name=".views.SettingsActivity"
-            android:theme="@style/AppTheme.ActionBar"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/main_drawer_settings"
-            android:configChanges="keyboardHidden|orientation|screenSize"/>
+            android:theme="@style/AppTheme.ActionBar" />
+
+        <service
+            android:name="com.umeng.update.net.DownloadingService"
+            android:process=":DownloadingService"/>
+        <activity
+            android:name="com.umeng.update.UpdateDialogActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="56302f3ee0f55a674e002bfa" />
+        <meta-data
+            android:name="UMENG_CHANNEL"
+            android:value="Channel ID" />
+
+        <service
+            android:name=".TesterChooserTargetService"
+            android:label="TesterHomeTargetService"
+            android:permission="android.permission.BIND_CHOOSER_TARGET_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.chooser.ChooserTargetService" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
